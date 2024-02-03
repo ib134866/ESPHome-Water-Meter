@@ -1,0 +1,200 @@
+substitutions:
+  name: water-meter
+  friendly_name: "ESPHome Water Meter"
+  update: 1000ms
+  cold_water_sensor: '4'
+  hot_water_sensor: '5'
+  pulses_per_liter: '396'
+  blue_LED_Pin: '2'
+  
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: true
+
+  project:
+    name: esphome.water_meter
+    version: "1.0"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+dashboard_import:
+  package_import_url: github://ib134866/ESPHome-Water-Meter/ESPHome_Water_Meter.yaml@master
+  import_full_config: true
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+wifi:
+  # setup wifi access point
+  ap:
+    password: "12345678"
+
+captive_portal:
+
+
+
+
+
+
+globals:
+  # variables
+  - id: cw_last_water_volume
+    type: float
+    restore_value: no
+    initial_value: '0.0f'
+  - id: previous_cw_total_water
+    type: float
+    restore_value: no
+    initial_value: '0.0f'
+  - id: previous_sensor_pulses_total
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: cw_last_sensor_pulses
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+
+# Sync time with Home Assistant.
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+# Text sensors with general information.
+text_sensor:
+  # Expose ESPHome version as sensor.
+  - platform: version
+    name: Water Meter - ESPHome
+  # Expose WiFi information as sensors.
+  - platform: wifi_info
+    ip_address:
+      name:  Water Meter IP
+    ssid:
+      name: Water Meter SSID
+    bssid:
+      name: Water Meter BSSID
+
+
+sensor:
+# capture the pulses from the water sennsor and cover to Liters/min
+  - platform: pulse_counter
+    pin:
+      number: ${cold_water_sensor}
+      mode:
+        input: true
+        pullup: true
+    unit_of_measurement: 'L/min'
+    accuracy_decimals: 2
+    id: cw_flow
+    name: "CW Flow"
+    state_class: measurement
+    update_interval: ${update}
+    filters:
+      - lambda: return (x / ${pulses_per_liter}); # 396 = 6.6 * 60
+    # keep a count of total pulses too 
+    total:
+      unit_of_measurement: 'pulses'
+      name: "CW sensor"
+      id: cw_sensor
+      internal: true
+      
+
+# capture the total water use in m³
+  - platform: integration
+    name: "CW Volume"
+    id: cw_volume
+    unit_of_measurement: 'm³'
+    accuracy_decimals: 2
+    sensor: cw_flow
+    state_class: total_increasing
+    time_unit: min
+    filters:
+        - lambda: return (x / 1000);
+
+# capture the total water use in Liters
+  - platform: integration
+    name: "CW Total Usage"
+    id: cw_total_usage
+    unit_of_measurement: 'L'
+    accuracy_decimals: 2
+    sensor: cw_flow
+    state_class: total_increasing
+    time_unit: min
+
+ # create sensor to capture the volume of water between flows
+  - platform: template
+    name: "Previous CW Usage"
+    id: previous_cw_usage
+    unit_of_measurement: 'L'
+    accuracy_decimals: 2
+    lambda: |-
+      if (id(cw_flow).state == 0.0) {
+        // Reset the counter when water_flow goes from non-zero to zero
+        // Store the previous state of CW Total Usage in a global variable
+        id(previous_cw_total_water) = id(cw_total_usage).state;
+      } else {
+        // calculate the water usage
+        id(cw_last_water_volume) = id(cw_total_usage).state - id(previous_cw_total_water);
+      }
+      // update the sensor with water use
+      return id(cw_last_water_volume);
+    state_class: measurement
+    update_interval: ${update}
+
+# create sensor to capture the volume of water between flows
+  - platform: template
+    name: "Previous CW Sensor"
+    id: previous_cw_sensor
+    unit_of_measurement: 'pulses'
+    accuracy_decimals: 0
+    lambda: |-
+      if (id(cw_flow).state == 0.0) {
+        // Reset the counter when water_flow goes from non-zero to zero
+        // Store the previous state of cw_sensor in a global variable
+        id(previous_sensor_pulses_total) = id(cw_sensor).state;
+        } else {
+        // calculate the number of pulses
+        id(cw_last_sensor_pulses) = id(cw_sensor).state - id(previous_sensor_pulses_total);
+      }
+      // update the sensor with number of pulses
+      return id(cw_last_sensor_pulses);
+    state_class: measurement
+    update_interval: ${update}
+
+
+# Turn on Water Flow indicator and flash the blue LED on the ESP32
+binary_sensor:
+  - platform: template
+    name: "CW Flow"
+    id: cw_flow_state
+    lambda: |-
+      return id(cw_flow).state > 0.0;
+    device_class: running
+    on_press: 
+      - while:
+          condition:
+            binary_sensor.is_on: cw_flow_state
+          then:
+            - output.turn_on: internal_blue_led
+            - delay: 0.25s
+            - output.turn_off: internal_blue_led
+            - delay: 0.25s
+
+output:
+  - platform: gpio
+    pin: 
+      number: ${blue_LED_Pin}
+      ignore_strapping_warning: true
+    id: internal_blue_led
+
+
