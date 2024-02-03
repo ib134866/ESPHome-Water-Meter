@@ -22,7 +22,7 @@ esp32:
     type: arduino
 
 dashboard_import:
-  package_import_url: github://ib134866/ESPHome-Water-Meter/ESPHome_Water_Meter.yaml@master
+  package_import_url: github://ib134866/ESPHome-Water-Meter/ESPHome_Water_Meter.yaml@main
   import_full_config: true
 
 # Enable logging

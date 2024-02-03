@@ -3,11 +3,11 @@ name: Build and Publish ESPHome firmware and website
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build:
-    uses: esphome/workflows/.github/workflows/publish.yml@master
+    uses: esphome/workflows/.github/workflows/publish.yml@main
     with:
       # CHANGEME: Set the filenames of your config files here:
       files: ESPHome_Water_Meter.yaml
