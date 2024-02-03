@@ -1,6 +1,8 @@
 substitutions:
-  name: water-meter
+  name: "water-meter"
   friendly_name: "ESPHome Water Meter"
+  project_name: "esphome.water_meter"
+  project_version: "1.0"
   update: 1000ms
   cold_water_sensor: '4'
   hot_water_sensor: '5'
@@ -11,19 +13,16 @@ esphome:
   name: ${name}
   friendly_name: ${friendly_name}
   name_add_mac_suffix: true
-
   project:
-    name: esphome.water_meter
-    version: "1.0"
+    name: ${project_name}
+    version: ${project_version}
 
 esp32:
   board: esp32dev
-  framework:
-    type: arduino
-
+  
 dashboard_import:
   package_import_url: github://ib134866/ESPHome-Water-Meter/ESPHome_Water_Meter.yaml@main
-  import_full_config: true
+  import_full_config: false
 
 # Enable logging
 logger:
@@ -35,14 +34,9 @@ ota:
 
 wifi:
   # setup wifi access point
-  ap:
-    password: "12345678"
-
+  ap: {}
+    
 captive_portal:
-
-
-
-
 
 
 globals:
