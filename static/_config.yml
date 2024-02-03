@@ -1,4 +1,4 @@
 # CHANGEME: Set these variable to your liking
-title: ESPHome Project Template
-description: Powered by ESPHome and ESP Web Tools
+title: ESPHome Water Meter
+description: A ESPHome powered water meter to monitor and report water use via a inline hall sensor
 theme: jekyll-theme-slate

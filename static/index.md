@@ -1,6 +1,6 @@
 # About
 
-Add some information about your project here.
+ESPHome project that uses a ESP32 to interface to a inline hall sensor to monitor and report on water use in Home Assistant.
 
 # Installation
 
