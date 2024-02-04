@@ -29,7 +29,7 @@ logger:
 
 # Enable Home Assistant API
 api:
-  id: api-server
+  id: api_server
 
 # Enable improve serial
 improv_serial:
