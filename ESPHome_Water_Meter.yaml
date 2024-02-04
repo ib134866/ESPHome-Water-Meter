@@ -29,6 +29,7 @@ logger:
 
 # Enable Home Assistant API
 api:
+  id: api-server
 
 # Enable improve serial
 improv_serial:
@@ -36,7 +37,7 @@ ota:
 
 wifi:
   # setup wifi access point
-  ap: {}
+  ap: 
     
 captive_portal:
 
