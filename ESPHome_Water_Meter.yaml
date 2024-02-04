@@ -29,10 +29,10 @@ logger:
 
 # Enable Home Assistant API
 api:
-  id: api_server
 
-# Enable improve serial
+# Enable improv serial
 improv_serial:
+# Enable OTA updates
 ota:
 
 wifi:
