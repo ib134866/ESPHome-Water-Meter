@@ -6,7 +6,7 @@ substitutions:
   update: 1000ms
   cold_water_sensor: '4'
   hot_water_sensor: '5'
-  pulses_per_liter: '396'
+  pulses_per_liter: '350'
   blue_LED_Pin: '2'
   
 esphome:
