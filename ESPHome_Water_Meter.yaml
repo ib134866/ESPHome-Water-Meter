@@ -30,6 +30,8 @@ logger:
 # Enable Home Assistant API
 api:
 
+# Enable improve serial
+improv_serial:
 ota:
 
 wifi:
